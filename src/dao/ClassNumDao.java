@@ -19,7 +19,7 @@ public class ClassNumDao extends Dao {
     // 学校コードからクラス番号一覧を取得（ラッパー）
     public List<ClassNum> filter(String schoolCd) throws Exception {
         School school = new School();
-        school.setSchoolCd(schoolCd); // 修正：setSchoolCd → setCd
+        school.setSchoolCd(schoolCd);
         return filter(school);
     }
 
