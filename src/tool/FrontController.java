@@ -17,7 +17,7 @@ public class FrontController extends HttpServlet {
         try {
             // リクエストからクラス名へ変換
             String path = req.getServletPath().substring(1);  // 例: "scoremanager/Login.action"
-            String name = path.replace(".a", "A").replace("/", ".");
+            String name = path.replace(".action", "Action").replace("/", ".");
 
             System.out.println("★ servlet path → " + req.getServletPath());
             System.out.println("★ class name   → " + name);

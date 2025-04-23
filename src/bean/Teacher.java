@@ -6,7 +6,8 @@ public class Teacher extends User implements Serializable {
     private String id;         // 教員ID
     private String password;
     private String name;
-    private School school;     // 所属学校(オブジェクト)
+    private School school;
+    // 所属学校(オブジェクト)
 
     public String getId() {
         return id;
@@ -45,4 +46,5 @@ public class Teacher extends User implements Serializable {
     public boolean isAuthenticated() {
         return true;
     }
+
 }

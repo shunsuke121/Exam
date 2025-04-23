@@ -9,6 +9,7 @@ public class Student implements Serializable {
     private String classNum;   // クラス番号
     private boolean isAttend;  // 在学中フラグ
     private String schoolCd;   // 学校コード
+    private School school;
 
     // --- ゲッター・セッター ---
 
@@ -63,5 +64,11 @@ public class Student implements Serializable {
     public Boolean getIsAttend() {
         return Boolean.valueOf(isAttend);
     }
+    public School getSchool() {
+        return school;
+    }
 
+    public void setSchool(School school) {
+        this.school = school;
+    }
 }

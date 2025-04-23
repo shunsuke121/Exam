@@ -19,4 +19,12 @@ public class School implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
+    public String getCd() {
+        return getSchoolCd();
+    }
+
+    public void setCd(String cd) {
+        setSchoolCd(cd);
+    }
+
 }

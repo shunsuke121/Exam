@@ -32,4 +32,5 @@ public class Subject implements Serializable {
     public String getSchoolCd() {
         return (school != null) ? school.getSchoolCd() : null;
     }
+
 }
