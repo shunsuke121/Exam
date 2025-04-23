@@ -21,10 +21,10 @@ public class SubjectListAction extends Action {
 
         // 所属学校に紐づく科目一覧を取得
         SubjectDao subjectDao = new SubjectDao();
-        List<Subject> subjectList = subjectDao.filter(teacher.getSchool());
-
         // 取得したリストをリクエストスコープにセット
+        List<Subject> subjectList = subjectDao.filter(teacher.getSchool());
         request.setAttribute("subjectList", subjectList);
+
 
         // 科目一覧JSPへフォワード
         return "scoremanager/main/subject_list.jsp";

@@ -19,7 +19,7 @@
   </li>
 
   <li class="nav-item mb-3">
-    <a href="${pageContext.request.contextPath}/SubjectList.action">科目管理</a>
+    <a href="${pageContext.request.contextPath}/scoremanager.main/SubjectList.action">科目管理</a>
   </li>
   <li class="nav-item mb-3">
     <a href="${pageContext.request.contextPath}/ClassList.action">クラス管理</a>

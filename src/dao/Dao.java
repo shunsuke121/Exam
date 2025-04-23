@@ -2,14 +2,20 @@ package dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-
-import javax.sql.DataSource;
+import java.sql.SQLException;
 
 public class Dao {
-    static DataSource ds;
 
-    public Connection getConnection() throws Exception {
+    // データベース接続メソッド
+    public Connection getConnection() throws ClassNotFoundException, SQLException {
+        // JDBCドライバのロード
         Class.forName("org.h2.Driver");
-        return DriverManager.getConnection("jdbc:h2:tcp://localhost/~/project", "sa", "");
+
+        // データベースへ接続
+        return DriverManager.getConnection(
+            "jdbc:h2:tcp://localhost/~/project", // DB URL
+            "sa",                                // ユーザー名
+            ""                                   // パスワード（未設定）
+        );
     }
 }
