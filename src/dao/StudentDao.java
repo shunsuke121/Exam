@@ -261,4 +261,60 @@ public class StudentDao extends Dao {
         school.setSchoolCd(schoolCd);
         return filterExcludeAttend(school);
     }
+
+    public List<Student> filter(String schoolCd, int entYear, String classNum) throws Exception {
+        List<Student> list = new ArrayList<>();
+
+        String sql = "SELECT * FROM STUDENT WHERE SCHOOL_CD = ? AND ENT_YEAR = ? AND CLASS_NUM = ? AND IS_ATTEND = TRUE ORDER BY NO";
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, schoolCd);
+            stmt.setInt(2, entYear);
+            stmt.setString(3, classNum);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Student student = new Student();
+                student.setNo(rs.getString("NO"));
+                student.setName(rs.getString("NAME"));
+                student.setEntYear(rs.getInt("ENT_YEAR"));
+                student.setClassNum(rs.getString("CLASS_NUM"));
+                student.setAttend(rs.getBoolean("IS_ATTEND"));
+                student.setSchoolCd(rs.getString("SCHOOL_CD"));
+                list.add(student);
+            }
+        }
+        return list;
+    }
+    public List<Student> filterByKey(School school, String key) throws Exception {
+
+        List<Student> list = new ArrayList<>();
+
+        String sql =
+            "SELECT * FROM STUDENT " +
+            " WHERE SCHOOL_CD = ?" +
+            "   AND (NO LIKE ? OR NAME LIKE ?) " +
+            " ORDER BY NO";
+
+        try (Connection con = getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, school.getSchoolCd());
+            ps.setString(2, "%" + key + "%");
+            ps.setString(3, "%" + key + "%");
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Student stu = new Student();
+                stu.setNo(rs.getString("NO"));
+                stu.setName(rs.getString("NAME"));
+                stu.setEntYear(rs.getInt("ENT_YEAR"));
+                stu.setClassNum(rs.getString("CLASS_NUM"));
+                stu.setSchool(school);
+                list.add(stu);
+            }
+        }
+        return list;
+    }
+
 }

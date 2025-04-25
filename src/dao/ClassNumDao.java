@@ -9,22 +9,10 @@ import java.util.List;
 import bean.ClassNum;
 import bean.School;
 
-/**
- * クラス番号テーブル DAO<br>
- * ER図／テーブル定義書「CLASS_NUM」に準拠。
- */
 public class ClassNumDao extends Dao {
 
-    /* ======================== 取得系 ======================== */
-
-    /**
-     * 1件取得（クラス変更画面などで使用予定）
-     * @param classNum  クラス番号
-     * @param school    学校オブジェクト
-     * @return  該当データがあれば ClassNum、なければ null
-     */
+    // 1件取得
     public ClassNum get(String classNum, School school) throws Exception {
-
         String sql = "SELECT * FROM CLASS_NUM WHERE SCHOOL_CD = ? AND CLASS_NUM = ?";
         Connection con = getConnection();
         PreparedStatement st = con.prepareStatement(sql);
@@ -42,26 +30,21 @@ public class ClassNumDao extends Dao {
         return cn;
     }
 
-    /** 学校コード（文字列）指定のラッパー */
+    // 一覧取得（学校コード指定）
     public List<ClassNum> filter(String schoolCd) throws Exception {
         School s = new School();
         s.setSchoolCd(schoolCd);
         return filter(s);
     }
 
-    /**
-     * 学校に紐づくクラス一覧を取得
-     * @param school School
-     * @return List&lt;ClassNum&gt;
-     */
+    // 一覧取得（Schoolオブジェクト指定）
     public List<ClassNum> filter(School school) throws Exception {
-
         List<ClassNum> list = new ArrayList<>();
         String sql = "SELECT * FROM CLASS_NUM WHERE SCHOOL_CD = ? ORDER BY CLASS_NUM";
 
         Connection con = getConnection();
         PreparedStatement st = con.prepareStatement(sql);
-        st.setString(1, school.getSchoolCd());      // ← getSchoolCd() を正としてコメント修正
+        st.setString(1, school.getSchoolCd());
         ResultSet rs = st.executeQuery();
 
         while (rs.next()) {
@@ -74,7 +57,49 @@ public class ClassNumDao extends Dao {
         return list;
     }
 
-    /* ======================== 登録／更新系（未使用） ======================== */
-    public boolean save(ClassNum cn) throws Exception { return false; }
-    public boolean save(ClassNum cn, String newClassNum) throws Exception { return false; }
+    // 新規登録
+    public boolean save(ClassNum cn) throws Exception {
+        String sql = "INSERT INTO CLASS_NUM (SCHOOL_CD, CLASS_NUM) VALUES (?, ?)";
+        Connection con = getConnection();
+        PreparedStatement st = con.prepareStatement(sql);
+        st.setString(1, cn.getSchoolCd());
+        st.setString(2, cn.getClassNum());
+        int result = st.executeUpdate();
+        st.close(); con.close();
+        return result == 1;
+    }
+
+    // クラス番号の更新＋紐づく学生のCLASS_NUMも更新
+    public boolean save(ClassNum cn, String newClassNum) throws Exception {
+        Connection con = getConnection();
+        try {
+            con.setAutoCommit(false);
+
+            // STUDENT テーブルの CLASS_NUM を更新
+            String sql1 = "UPDATE STUDENT SET CLASS_NUM = ? WHERE SCHOOL_CD = ? AND CLASS_NUM = ?";
+            PreparedStatement st1 = con.prepareStatement(sql1);
+            st1.setString(1, newClassNum);
+            st1.setString(2, cn.getSchoolCd());
+            st1.setString(3, cn.getClassNum());
+            st1.executeUpdate();
+
+            // CLASS_NUM テーブルの CLASS_NUM を更新
+            String sql2 = "UPDATE CLASS_NUM SET CLASS_NUM = ? WHERE SCHOOL_CD = ? AND CLASS_NUM = ?";
+            PreparedStatement st2 = con.prepareStatement(sql2);
+            st2.setString(1, newClassNum);
+            st2.setString(2, cn.getSchoolCd());
+            st2.setString(3, cn.getClassNum());
+            int result = st2.executeUpdate();
+
+            con.commit();
+            st1.close();
+            st2.close();
+            con.close();
+            return result == 1;
+        } catch (Exception e) {
+            con.rollback();
+            con.close();
+            throw e;
+        }
+    }
 }

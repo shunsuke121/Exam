@@ -4,67 +4,74 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
-import bean.School;
 import bean.Student;
 import bean.Subject;
 import bean.Teacher;
 import bean.Test;
-import dao.StudentDao;
-import dao.SubjectDao;
 import dao.TestDao;
 import tool.Action;
 
 public class TestRegistExecuteAction extends Action {
 
     @Override
-    public String execute(HttpServletRequest req,
-                          HttpServletResponse res) throws Exception {
+    public String execute(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-        req.setCharacterEncoding("UTF-8");
+        // セッションから教員情報を取得
+        Teacher teacher = (Teacher) request.getSession().getAttribute("user");
 
-        HttpSession ses = req.getSession();
-        Teacher teacher = (Teacher) ses.getAttribute("user");
-        if (teacher == null) return "/login.jsp";
+        // 検索条件を取得（hiddenで渡ってきたもの）
+        int entYear = Integer.parseInt(request.getParameter("ent_year"));
+        String classNum = request.getParameter("class_num");
+        String subjectCd = request.getParameter("subject_cd");
+        int num = Integer.parseInt(request.getParameter("num"));
 
-        School school = teacher.getSchool();
+        // 配列で渡ってきた学生番号と点数
+        String[] nos = request.getParameterValues("nos");
+        String[] points = request.getParameterValues("points");
 
-        /* ---------- パラメータ ---------- */
-        int    entYear = Integer.parseInt(req.getParameter("f1"));
-        String classNo = req.getParameter("f2");
-        String subjCd  = req.getParameter("f3");
-        int    count   = Integer.parseInt(req.getParameter("f4"));
+        // セッションから科目リストを取得して、選択されたSubjectを特定
+        @SuppressWarnings("unchecked")
+        List<Subject> subjectList = (List<Subject>) request.getSession().getAttribute("subjectList");
+        Subject subject = subjectList.stream()
+            .filter(s -> s.getCd().equals(subjectCd))
+            .findFirst()
+            .orElse(null);
 
-        /* ---------- 必要データ ---------- */
-        List<Student> students = new StudentDao()
-                .filter(school, entYear, classNo, true);
-        Subject subject = new SubjectDao().get(school, subjCd);
+        if (subject == null) {
+            throw new Exception("指定された科目が見つかりません");
+        }
 
-        /* ---------- 登録処理 ---------- */
-        TestDao tDao = new TestDao();
-        for (Student s : students) {
-            String pStr = req.getParameter("point_" + s.getNo());
-            if (pStr == null || pStr.isEmpty()) continue;
+        TestDao testDao = new TestDao();
 
-            int point;
+        // 登録処理（1件ずつ）
+        for (int i = 0; i < nos.length; i++) {
+            if (points[i] == null || points[i].trim().isEmpty()) continue;
+
+            int p;
             try {
-                point = Integer.parseInt(pStr);
-                if (point < 0 || point > 100) continue;
+                p = Integer.parseInt(points[i]);
             } catch (NumberFormatException e) {
                 continue;
             }
 
-            Test t = new Test();
-            t.setStudent(s);
-            t.setSubject(subject);
-            t.setEntYear(entYear);
-            t.setNo(count);
-            t.setPoint(point);
-            t.setClassNum(classNo);
+            if (p < 0 || p > 100) continue;
 
-            tDao.save(t);
+            Student stu = new Student();
+            stu.setNo(nos[i]);
+            stu.setClassNum(classNum);
+
+            Test test = new Test();
+            test.setStudent(stu);
+            test.setSubject(subject);
+            test.setNum(num);
+            test.setPoint(p);
+            test.setSchool(teacher.getSchool());
+
+            testDao.save(test);
         }
+
+        // 完了画面へ遷移
         return "scoremanager/main/test_regist_done.jsp";
     }
 }
