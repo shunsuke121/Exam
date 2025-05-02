@@ -11,8 +11,8 @@
         登録が完了しました。
       </div>
       <div class="px-4">
-        <a href="TestRegist.action" class="me-3">成績登録へ戻る</a>
-        <a href="menu.jsp">メニューへ戻る</a>
+        <a href="TestRegist.action" class="me-3">戻る</a>
+        <a href="TestList.action" class="me-3">成績参照</a>
       </div>
     </section>
   </c:param>
